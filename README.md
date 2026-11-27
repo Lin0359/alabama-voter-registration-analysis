@@ -1,46 +1,47 @@
 # Alabama Voter Registration and Participation
 
-An exploratory county-level analysis of Alabama voter registration and election participation using locally supplied registration and racial-participation workbooks.
+An exploratory county-level analysis of Alabama voter registration and election participation. The current workflow filters both supplied workbooks to 2024 and produces descriptive metrics and charts.
 
-## Project scope
+## Scope
 
-The original analysis combines county registration records with 2020 and 2024 participation data. It examines 2024 inactive-registration rates and a turnout proxy, then compares a small set of counties with manually supplied polling-place counts.
-
-This repository contains code and documentation only. Source workbooks are not included because they were stored locally and may have access or redistribution restrictions.
+This is a cross-sectional, county-level project. It does not estimate individual voting behavior or establish that polling access causes turnout. Source workbooks are not included; obtain the original files and verify their provenance, definitions, and reuse terms before drawing conclusions or sharing derived data.
 
 ## Data inputs
 
-Provide two Excel workbooks when running the script:
+Run the script with two Excel workbooks:
 
-1. A registration workbook with `year`, `county`, `inactive_total`, `total_active_inactive`, and `active_total`.
-2. A participation workbook with `Year`, `county`, and `total_ballots_cast`.
+- Registration workbook columns: `year`, `county`, `inactive_total`, `total_active_inactive`, and `active_total`.
+- Participation workbook columns: `year`, `county`, and `total_ballots_cast`.
 
-The script standardizes `Year` to `year` and joins records on county and year. Verify that the workbooks use consistent county names and comparable definitions before interpreting results.
+Column names are matched without regard to case. County names are trimmed and converted to uppercase before joining. Numeric values may contain commas. The code sums duplicate county rows, so confirm that repeated rows are additive records rather than duplicate snapshots. Only counties present in both files are retained.
 
 ## Run
 
-Requires Python 3.10+.
+Requires Python 3.10 or newer.
 
 ```bash
 python -m pip install -r requirements.txt
-python alabama_voter_analysis.py --registration path/to/registration.xlsx --participation path/to/participation.xlsx --output-dir outputs
+python analyze_alabama_voters.py --registration path/to/registration.xlsx --participation path/to/participation.xlsx --output-dir outputs
 ```
 
-The script writes three PNG charts to the output folder: inactive-registration rate by county, the turnout proxy by county, and polling-place availability versus the turnout proxy for seven counties with supplied polling-place counts.
+The script writes two CSV files and three PNG charts to `outputs/`: county metrics, a seven-county polling-count subset, inactive-registration rate by county, turnout proxy by county, and the transcribed polling-location counts.
 
-## Definitions and limitations
+## Measures and limitations
 
-- **Inactive-registration rate** is calculated as inactive registrations divided by the workbook's `total_active_inactive` field. Confirm that this denominator matches the source's official definition.
-- **Turnout proxy** is ballots cast divided by active registrations. It is a county-level ratio, not an individual turnout rate; it can exceed 1 if the files use different universes or reporting periods.
-- Polling-place counts are manually entered for seven counties only. This small, incomplete comparison cannot establish an effect of polling access on turnout.
-- The original code included race-specific rates, but the field definitions and denominators need verification before they can be presented as race-specific turnout. They are omitted from the cleaned workflow until those definitions are confirmed.
-- These are descriptive aggregates. They do not establish causal relationships or account for uncertainty, demographic composition, election type, or reporting differences.
-- Check the source workbook documentation and applicable terms before publishing data or derived tables.
+- **Inactive-registration rate:** `inactive_total / total_active_inactive`. Check that the denominator matches the source workbook's definition.
+- **Turnout proxy:** `total_ballots_cast / active_total`. This is an aggregate ratio, not an individual turnout rate; it may exceed 1 when source populations or reporting periods differ.
+- **Polling locations:** counts are manually transcribed for Autauga (12), Baldwin (39), Bibb (8), Blount (18), Bullock (6), Butler (10), and Calhoun (25). The original source for these counts must be checked before reuse. Seven counties are not a representative statewide sample, and the chart does not support a causal claim.
+- The present workflow does not calculate race-specific metrics or compare years. Those analyses require documented field meanings, denominators, and comparable source coverage.
+- Results are descriptive and sensitive to differences in source definitions, election type, and reporting.
 
-## Files
+## Repository files
 
 | File | Purpose |
 | --- | --- |
-| `alabama_voter_analysis.py` | Loads the two workbooks, validates required fields, computes documented ratios, and creates charts. |
+| `analyze_alabama_voters.py` | Reproducible data preparation, metrics, and chart generation. |
 | `requirements.txt` | Python dependencies. |
-| `.gitignore` | Excludes local workbooks and generated outputs. |
+| `.gitignore` | Excludes local spreadsheets, generated outputs, and Python cache/virtual-environment files. |
+
+## Next improvement
+
+Add source links, retrieval dates, and a data dictionary once the exact workbook versions used in the original report are available.
